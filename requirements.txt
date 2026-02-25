@@ -1,0 +1,63 @@
+# =========================
+# Core Framework
+# =========================
+fastapi
+uvicorn[standard]
+python-multipart
+
+# =========================
+# LangChain Core
+# =========================
+langchain
+langchain-community
+langchain-qdrant
+langchain-text-splitters
+
+# =========================
+# Gemini LLM
+# =========================
+langchain-google-genai
+google-generativeai
+
+# =========================
+# HuggingFace Embeddings
+# =========================
+langchain-huggingface==1.2.0
+sentence-transformers>=2.7.0
+transformers==4.41.2
+huggingface-hub==0.34.6
+
+# =========================
+# Vector Database
+# =========================
+qdrant-client
+
+# =========================
+# Document Processing
+# =========================
+pypdf
+python-docx
+
+# =========================
+# Evaluation
+# =========================
+datasets
+ragas==0.3.7
+
+# =========================
+# Configuration
+# =========================
+pydantic
+pydantic-settings
+python-dotenv
+
+# =========================
+# Logging
+# =========================
+structlog
+langsmith==0.4.55
+
+# =========================
+# HTTP
+# =========================
+httpx
