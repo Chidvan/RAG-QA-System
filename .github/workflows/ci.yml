@@ -6,12 +6,12 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.11"
 
 jobs:
   # ============================================
@@ -81,7 +81,7 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          OPENAI_API_KEY: "test-key"
+          GOOGLE_API_KEY: "test-key"
           QDRANT_URL: "http://localhost:6333"
           QDRANT_API_KEY: "test-key"
         run: |
