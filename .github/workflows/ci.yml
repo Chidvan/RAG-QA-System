@@ -7,20 +7,31 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  build:
+    name: Build Docker Image
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t rag-qa-system:ci .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: rag-qa-system:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Run container and test import
+      - name: Test Docker image
         run: |
+          docker build -t rag-qa-system:test .
           docker run --rm \
-            --env GOOGLE_API_KEY=test-key \
-            --env QDRANT_URL=http://localhost:6333 \
-            --env QDRANT_API_KEY=test-key \
-            rag-qa-system:ci \
-            python -c "from app.main import app; print('App loaded successfully')"
+            -env GOOGLE_API_KEY=test-key \
+            -env QDRANT_URL=http://localhost:6333 \
+            -env QDRANT_API_KEY=test-key \
+            rag-qa-system:test python -c "from app.main import app; print('App loaded successfully')"
