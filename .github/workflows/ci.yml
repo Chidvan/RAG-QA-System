@@ -25,7 +25,7 @@ jobs:
       - name: Run container and test app import
         run: |
           docker run --rm \
-            -e OPENAI_API_KEY=test-key \
+            -e GOOGLE_API_KEY=test-key \
             -e QDRANT_URL=http://localhost:6333 \
             -e QDRANT_API_KEY=test-key \
             rag-qa-system:ci \
