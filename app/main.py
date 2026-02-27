@@ -1,13 +1,13 @@
 """FastAPI application entry point."""
 
-# IMPORTANT: Load .env file FIRST, before any LangChain imports
-# This ensures LangSmith environment variables are available for tracing
-# ruff: noqa: E402, I001
+# IMPORTANT: Load .env file FIRST
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from contextlib import asynccontextmanager
+from pathlib import Path
+import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,13 +19,13 @@ from app.api.routes import documents, health, query
 from app.config import get_settings
 from app.utils.logger import get_logger, setup_logging
 
+# Load settings
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
-    # Startup
     setup_logging(settings.log_level)
     logger = get_logger(__name__)
     logger.info(f"Starting {settings.app_name} v{__version__}")
@@ -33,7 +33,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown
     logger.info("Shutting down application")
 
 
@@ -44,17 +43,17 @@ app = FastAPI(
 ## RAG Q&A System API
 
 A Retrieval-Augmented Generation (RAG) question-answering system built with:
-- **FastAPI** for the API layer
-- **LangChain** for RAG orchestration
-- **Qdrant Cloud** for vector storage
-- **OpenAI** for embeddings and LLM
+- FastAPI for API layer
+- LangChain for RAG orchestration
+- Qdrant for vector storage
+- Gemini / OpenAI models for LLM
 
 ### Features
-- Upload PDF, TXT, and CSV documents
-- Ask questions and get AI-powered answers
-- View source documents for transparency
-- Streaming responses for real-time feedback
-    """,
+- Upload PDF, TXT, CSV
+- Ask AI-powered questions
+- Source document transparency
+- Streaming responses
+""",
     version=__version__,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -62,7 +61,7 @@ A Retrieval-Augmented Generation (RAG) question-answering system built with:
     lifespan=lifespan,
 )
 
-# Add CORS middleware
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -71,25 +70,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# -----------------------------
+# Static Files (CI-Safe Mount)
+# -----------------------------
 
-# Include routers
+STATIC_DIR = Path("static")
+
+if STATIC_DIR.exists() and STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# -----------------------------
+# Routers
+# -----------------------------
+
 app.include_router(health.router)
 app.include_router(documents.router)
 app.include_router(query.router)
 
+# -----------------------------
+# Root Endpoint (Safe)
+# -----------------------------
 
 @app.get("/", response_class=HTMLResponse, tags=["Root"])
 async def root():
-    """Serve the main UI."""
-    with open("static/index.html", "r") as f:
-        return f.read()
+    """Serve UI if available; otherwise show API status."""
+    index_file = STATIC_DIR / "index.html"
 
+    if index_file.exists():
+        return index_file.read_text()
+
+    return HTMLResponse(
+        content="<h3>RAG Q&A System API is running</h3>",
+        status_code=200,
+    )
+
+# -----------------------------
+# Global Exception Handler
+# -----------------------------
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler."""
     logger = get_logger(__name__)
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
 
@@ -101,6 +121,9 @@ async def global_exception_handler(request: Request, exc: Exception):
         },
     )
 
+# -----------------------------
+# Local Development Entry
+# -----------------------------
 
 if __name__ == "__main__":
     import uvicorn
