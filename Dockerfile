@@ -51,9 +51,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy application code
 COPY app/ ./app/
 
-# Copy static directory (if exists)
-# Make sure static folder exists in project
-COPY static/ ./static/
 
 # =========================
 # HuggingFace Cache Fix
