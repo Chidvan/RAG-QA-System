@@ -3,7 +3,6 @@
 # IMPORTANT: Load .env file FIRST, before any LangChain imports
 # This ensures LangSmith environment variables are available for tracing
 # ruff: noqa: E402, I001
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
