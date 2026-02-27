@@ -33,7 +33,9 @@ class RAGASEvaluator:
             if self.settings.ragas_llm_temperature is not None
             else self.settings.llm_temperature
         )
-        eval_embedding_model = self.settings.ragas_embedding_model or self.settings.embedding_model
+        eval_embedding_model = (
+            self.settings.ragas_embedding_model or self.settings.embedding_model
+        )
 
         # Initialize LLM for evaluation
         self.llm = ChatGoogleGenerativeAI(
@@ -43,9 +45,7 @@ class RAGASEvaluator:
         )
 
         # Initialize embeddings for evaluation
-        self.embeddings = HuggingFaceEmbeddings(
-            model=eval_embedding_model
-        )
+        self.embeddings = HuggingFaceEmbeddings(model=eval_embedding_model)
 
         # Initialize metrics (reference-free only)
         self.metrics = [
@@ -93,9 +93,13 @@ class RAGASEvaluator:
 
             # Extract scores
             scores = {
-                "faithfulness": float(result["faithfulness"]) if "faithfulness" in result else None,
+                "faithfulness": (
+                    float(result["faithfulness"]) if "faithfulness" in result else None
+                ),
                 "answer_relevancy": (
-                    float(result["answer_relevancy"]) if "answer_relevancy" in result else None
+                    float(result["answer_relevancy"])
+                    if "answer_relevancy" in result
+                    else None
                 ),
                 "evaluation_time_ms": round(evaluation_time_ms, 2),
                 "error": None,
@@ -139,7 +143,8 @@ class RAGASEvaluator:
         }
 
         logger.debug(
-            f"Prepared dataset with {len(contexts)} contexts " f"for question: {question[:50]}..."
+            f"Prepared dataset with {len(contexts)} contexts "
+            f"for question: {question[:50]}..."
         )
 
         return Dataset.from_dict(data)
