@@ -4,10 +4,6 @@
 # This ensures LangSmith environment variables are available for tracing
 # ruff: noqa: E402, I001
 import os
-
-if os.path.isdir("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-
 from dotenv import load_dotenv
 
 load_dotenv()
